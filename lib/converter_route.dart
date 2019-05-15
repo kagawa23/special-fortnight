@@ -40,8 +40,8 @@ class ConverterRoute extends StatefulWidget {
 class _ConverterRouteState extends State<ConverterRoute> {
   // TODO: Set some variables, such as for keeping track of the user's input
   // value and units
-  var _value = '';
-
+  Unit _fromValue ;
+  List<DropdownMenuItem> _unitMenuItems;
   // TODO: Determine whether you need to override anything, such as initState()
 
   // TODO: Add other helper functions. We've given you one, _format()
@@ -62,40 +62,98 @@ class _ConverterRouteState extends State<ConverterRoute> {
     return outputNum;
   }
 
+
+  void _createMenuItems(){
+    setState(() {
+      _unitMenuItems = widget.units.map((Unit unit) {
+        return DropdownMenuItem(
+          value:  unit.name,
+          child: Text(
+            unit.name,
+          ),
+        );
+      }).toList();
+    });
+  }
+
+  void _setDefault(){
+    setState(() {
+      _fromValue = widget.units[0];
+    });
+  }
+
+  Unit _getUnit(String unitName) {
+    return widget.units.firstWhere((Unit unit) {
+      return unit.name == unitName;
+    },orElse: null);
+  }
+
+  Widget generateTextField(String label) {
+    return TextFormField(
+      decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderSide: BorderSide(width: 1.0)
+          )
+      ),
+      keyboardType: TextInputType.number,
+    );
+  }
+
+  Widget generateDropdownList(items, onChange, value) {
+    return DropdownButton(
+      items: _unitMenuItems,
+      onChanged: (value){
+        setState(() {
+          _fromValue = _getUnit(value);
+        });
+      },
+      value: _fromValue.name,
+    );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    this._createMenuItems();
+    this._setDefault();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final unitDropDownItems = widget.units.map((Unit unit) {
-      return DropdownMenuItem(
-          value:  unit.name,
-          child: Column(
-        children: <Widget>[
-          Text(
-            unit.name,
-            style: Theme.of(context).textTheme.headline,
-          ),
-          Text(
-            'Conversion: ${unit.conversion}',
-            style: Theme.of(context).textTheme.subhead,
-          ),
-        ],
-      ));
-    }).toList();
     // TODO: Create the 'input' group of widgets. This is a Column that
     // includes the input value, and 'from' unit [Dropdown].
     final inputGroup = Column(
       children: <Widget>[
-        TextFormField(
-          decoration: const InputDecoration(labelText: 'Input'),
-        ),
-        DropdownButton(
-          items: unitDropDownItems,
-          onChanged: (value) {
-            print(value);
-//            _value = value;
-          },
-          value: -1,),
+        generateTextField('Input'),
+        generateDropdownList(_unitMenuItems, (value){
+          setState(() {
+            _fromValue = _getUnit(value);
+          });
+        }, _fromValue.name)
       ],
     );
+
+    final outputGroup = Column(
+      children: <Widget>[
+        generateTextField('Output'),
+        generateDropdownList(_unitMenuItems, (value){
+          setState(() {
+            _fromValue = _getUnit(value);
+          });
+        }, _fromValue.name)
+      ],
+    );
+
+    final arrows = RotatedBox(
+      quarterTurns: 1,
+      child: Icon(
+        Icons.compare_arrows,
+        size: 40.0,
+      ),
+    );
+
     // TODO: Create a compare arrows icon.
 
     // TODO: Create the 'output' group of widgets. This is a Column that
@@ -104,29 +162,16 @@ class _ConverterRouteState extends State<ConverterRoute> {
     // TODO: Return the input, arrows, and output widgets, wrapped in a Column.
 
     // TODO: Delete the below placeholder code.
-//    final unitWidgets = widget.units.map((Unit unit) {
-//      return Container(
-//        color: widget.color,
-//        margin: EdgeInsets.all(8.0),
-//        padding: EdgeInsets.all(16.0),
-//        child: Column(
-//          children: <Widget>[
-//            Text(
-//              unit.name,
-//              style: Theme.of(context).textTheme.headline,
-//            ),
-//            Text(
-//              'Conversion: ${unit.conversion}',
-//              style: Theme.of(context).textTheme.subhead,
-//            ),
-//          ],
-//        ),
-//      );
-//    }).toList();
 
-//    return ListView(
-//      children: unitWidgets,
-//    );
-    return inputGroup;
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: ListView(
+        children: <Widget>[
+          inputGroup,
+          arrows,
+          outputGroup,
+        ],
+      ),
+    );
   }
 }
