@@ -40,8 +40,10 @@ class ConverterRoute extends StatefulWidget {
 class _ConverterRouteState extends State<ConverterRoute> {
   // TODO: Set some variables, such as for keeping track of the user's input
   // value and units
-  Unit _fromValue ;
+  Unit _fromValue;
   List<DropdownMenuItem> _unitMenuItems;
+  double _inputValue;
+  bool _showInputError = false;
   // TODO: Determine whether you need to override anything, such as initState()
 
   // TODO: Add other helper functions. We've given you one, _format()
@@ -62,12 +64,11 @@ class _ConverterRouteState extends State<ConverterRoute> {
     return outputNum;
   }
 
-
-  void _createMenuItems(){
+  void _createMenuItems() {
     setState(() {
       _unitMenuItems = widget.units.map((Unit unit) {
         return DropdownMenuItem(
-          value:  unit.name,
+          value: unit.name,
           child: Text(
             unit.name,
           ),
@@ -76,7 +77,7 @@ class _ConverterRouteState extends State<ConverterRoute> {
     });
   }
 
-  void _setDefault(){
+  void _setDefault() {
     setState(() {
       _fromValue = widget.units[0];
     });
@@ -85,25 +86,55 @@ class _ConverterRouteState extends State<ConverterRoute> {
   Unit _getUnit(String unitName) {
     return widget.units.firstWhere((Unit unit) {
       return unit.name == unitName;
-    },orElse: null);
+    }, orElse: null);
+  }
+
+  void _updateInput(String input) {
+    if(input == null || input.isEmpty) {
+
+    }else {
+      try {
+        final inputDouble = double.parse(input);
+        setState(() {
+          _showInputError = false;
+        });
+      }on Exception catch(e){
+        print('Error:$e');
+        setState(() {
+          _showInputError = true;
+        });
+      }
+    }
   }
 
   Widget generateTextField(String label) {
-    return TextFormField(
+    return TextField(
       decoration: InputDecoration(
           labelText: label,
+          errorText: _showInputError?'The input should be double':null,
+          labelStyle: TextStyle(color: Colors.grey),
           border: OutlineInputBorder(
-            borderSide: BorderSide(width: 1.0)
-          )
-      ),
+            borderSide: BorderSide(width: 1.0, color: Colors.grey),
+            borderRadius: BorderRadius.all(Radius.circular(0.0)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+            borderRadius: BorderRadius.all(Radius.circular(0.0)),
+          )),
       keyboardType: TextInputType.number,
+      onChanged: _updateInput,
+//      validator: (value){
+//        if(value.isEmpty) {
+//          return 'Please enter some text';
+//        }
+//      },
     );
   }
 
   Widget generateDropdownList(items, onChange, value) {
     return DropdownButton(
       items: _unitMenuItems,
-      onChanged: (value){
+      onChanged: (value) {
         setState(() {
           _fromValue = _getUnit(value);
         });
@@ -127,7 +158,7 @@ class _ConverterRouteState extends State<ConverterRoute> {
     final inputGroup = Column(
       children: <Widget>[
         generateTextField('Input'),
-        generateDropdownList(_unitMenuItems, (value){
+        generateDropdownList(_unitMenuItems, (value) {
           setState(() {
             _fromValue = _getUnit(value);
           });
@@ -138,7 +169,7 @@ class _ConverterRouteState extends State<ConverterRoute> {
     final outputGroup = Column(
       children: <Widget>[
         generateTextField('Output'),
-        generateDropdownList(_unitMenuItems, (value){
+        generateDropdownList(_unitMenuItems, (value) {
           setState(() {
             _fromValue = _getUnit(value);
           });
