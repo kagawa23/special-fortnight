@@ -69,9 +69,12 @@ class _ConverterRouteState extends State<ConverterRoute> {
       _unitMenuItems = widget.units.map((Unit unit) {
         return DropdownMenuItem(
           value: unit.name,
-          child: Text(
-            unit.name,
-          ),
+          child: Container(
+              child: Text(
+                    unit.name,
+                    softWrap: true,
+                  )
+              ),
         );
       }).toList();
     });
@@ -90,15 +93,14 @@ class _ConverterRouteState extends State<ConverterRoute> {
   }
 
   void _updateInput(String input) {
-    if(input == null || input.isEmpty) {
-
-    }else {
+    if (input == null || input.isEmpty) {
+    } else {
       try {
         final inputDouble = double.parse(input);
         setState(() {
           _showInputError = false;
         });
-      }on Exception catch(e){
+      } on Exception catch (e) {
         print('Error:$e');
         setState(() {
           _showInputError = true;
@@ -111,7 +113,7 @@ class _ConverterRouteState extends State<ConverterRoute> {
     return TextField(
       decoration: InputDecoration(
           labelText: label,
-          errorText: _showInputError?'The input should be double':null,
+          errorText: _showInputError ? 'The input should be double' : null,
           labelStyle: TextStyle(color: Colors.grey),
           border: OutlineInputBorder(
             borderSide: BorderSide(width: 1.0, color: Colors.grey),
@@ -132,15 +134,35 @@ class _ConverterRouteState extends State<ConverterRoute> {
   }
 
   Widget generateDropdownList(items, onChange, value) {
-    return DropdownButton(
-      items: _unitMenuItems,
-      onChanged: (value) {
-        setState(() {
-          _fromValue = _getUnit(value);
-        });
-      },
-      value: _fromValue.name,
-    );
+    return Container(
+        margin: EdgeInsets.only(top: 16.0),
+        padding: EdgeInsets.symmetric(vertical: 8.0),
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            canvasColor: Colors.grey[50],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Expanded(
+                child: DropdownButtonHideUnderline(
+                    child: ButtonTheme(
+                        alignedDropdown: true,
+                        child: DropdownButton(
+                          items: _unitMenuItems,
+                          onChanged: (value) {
+                            setState(() {
+                              _fromValue = _getUnit(value);
+                            });
+                          },
+                          value: _fromValue.name,
+                          style: Theme.of(context).textTheme.title,
+                        ))),
+              )
+            ],
+          )
+
+        ));
   }
 
   @override
